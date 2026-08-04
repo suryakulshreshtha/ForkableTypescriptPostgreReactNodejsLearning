@@ -65,6 +65,15 @@ docker compose up -d
 #   psql -d forkable_learning      -f backend/migrations/001_create_practice_platform_tables.sql
 #   psql -d forkable_learning_test -f backend/migrations/001_create_practice_platform_tables.sql
 
+# Optional: seed the dev database with a handful of sample meditations,
+# retreats, and testimonials so the app isn't empty on first run. Safe to
+# skip, and safe to re-run (it's a no-op if data already exists). Not
+# applied to the test database — every integration test truncates its own
+# tables before running, so seed data would just be wiped anyway.
+#   psql -d forkable_learning -f backend/migrations/002_seed_sample_data.sql
+# (docker-compose applies this automatically on first container start,
+# since it mounts the whole migrations/ folder.)
+
 # 2. Backend
 cd backend
 cp .env.example .env   # adjust credentials if needed
