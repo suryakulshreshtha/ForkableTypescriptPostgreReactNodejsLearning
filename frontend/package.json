@@ -1,7 +1,7 @@
 {
   "name": "forkable-learning-frontend",
   "version": "1.0.0",
-  "description": "React + TypeScript frontend for the Tasks learning app",
+  "description": "React + TypeScript frontend for a mindful-practice learning app (meditation library, session streaks, retreats, testimonials)",
   "type": "module",
   "scripts": {
     "dev": "vite",

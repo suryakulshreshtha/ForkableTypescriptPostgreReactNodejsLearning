@@ -1,7 +1,10 @@
 import express, { Express } from 'express';
 import cors from 'cors';
 import { Pool } from 'pg';
-import { createTasksRouter } from './routes/tasks.routes';
+import { createMeditationsRouter } from './routes/meditations.routes';
+import { createSessionsRouter } from './routes/sessions.routes';
+import { createRetreatsRouter } from './routes/retreats.routes';
+import { createTestimonialsRouter } from './routes/testimonials.routes';
 import { errorHandler } from './middleware/errorHandler';
 
 /**
@@ -19,7 +22,10 @@ export function createApp(pool: Pool): Express {
     res.status(200).json({ status: 'ok' });
   });
 
-  app.use('/api/tasks', createTasksRouter(pool));
+  app.use('/api/meditations', createMeditationsRouter(pool));
+  app.use('/api/sessions', createSessionsRouter(pool));
+  app.use('/api/retreats', createRetreatsRouter(pool));
+  app.use('/api/testimonials', createTestimonialsRouter(pool));
 
   app.use(errorHandler);
 

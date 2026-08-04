@@ -42,7 +42,7 @@ jobs:
       - name: Apply migrations to test database
         env:
           PGPASSWORD: postgres
-        run: psql -h localhost -U postgres -d forkable_learning_test -f backend/migrations/001_create_tasks_table.sql
+        run: psql -h localhost -U postgres -d forkable_learning_test -f backend/migrations/001_create_practice_platform_tables.sql
 
       - name: Lint
         working-directory: backend
@@ -133,7 +133,7 @@ jobs:
       - name: Apply migrations to dev database
         env:
           PGPASSWORD: postgres
-        run: psql -h localhost -U postgres -d forkable_learning -f backend/migrations/001_create_tasks_table.sql
+        run: psql -h localhost -U postgres -d forkable_learning -f backend/migrations/001_create_practice_platform_tables.sql
 
       - name: Install backend dependencies
         working-directory: backend

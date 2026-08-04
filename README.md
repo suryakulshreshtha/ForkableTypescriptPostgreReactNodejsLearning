@@ -4,20 +4,31 @@ A small, fully-tested full-stack reference app — built the way an SDET would b
 
 **Stack:** React 18 · TypeScript · Node.js / Express · PostgreSQL
 
-The sample domain is a small **Tasks** CRUD app (create / list / complete / delete), kept intentionally simple so the focus stays on structure and testing, not business logic.
+## The sample domain: a mindful-practice app
+
+The example app is a small **meditation practice platform** — a meditation library, session logging with streak tracking, retreat events with real capacity enforcement, and community testimonials. It's modeled loosely on the *shape* of meditation/personal-growth platforms in general (library + session tracking + ticketed events + testimonials), chosen because that domain gives us richer, more realistic business logic to test than a plain to-do list — day-boundary streak math, race-condition-safe capacity limits, and category filtering.
+
+> **Not affiliated with any specific company, teacher, or brand.** All meditation titles, retreat names, and testimonial content in the seed data are invented for this example — nothing here reproduces real course material or real people's stories.
 
 ## Repository layout
 
 ```
 .
 ├── backend/          Express + TypeScript REST API, backed by PostgreSQL
-│   ├── src/           app.ts (Express app factory), controllers, routes, db pool
-│   ├── migrations/     SQL migrations
+│   ├── src/
+│   │   ├── controllers/  meditations, sessions, retreats, testimonials
+│   │   ├── routes/
+│   │   ├── utils/streak.ts   pure streak-calculation function (see below)
+│   │   └── app.ts        Express app factory
+│   ├── migrations/     SQL migration for the practice-platform schema
 │   └── tests/
-│       ├── unit/        Controller logic, pg fully mocked — no DB required
-│       └── integration/ Full HTTP stack via supertest against a real Postgres DB
+│       ├── unit/         Controller logic + streak.ts — pg fully mocked, no DB required
+│       └── integration/  Full HTTP stack via supertest against a real Postgres DB
 ├── frontend/         React + TypeScript UI (Vite)
-│   └── src/tests/     Component tests (Vitest + React Testing Library)
+│   └── src/
+│       ├── components/    MeditationLibrary, LogSessionForm, StreakDashboard,
+│       │                  RetreatsList, TestimonialsList
+│       └── tests/         Component tests (Vitest + React Testing Library)
 ├── e2e/              Playwright end-to-end tests driving a real browser against
 │                      the real frontend + backend + database
 └── .github/workflows/ci.yml   CI pipeline running every layer above
@@ -25,12 +36,15 @@ The sample domain is a small **Tasks** CRUD app (create / list / complete / dele
 
 ## Why this structure
 
-- **`createApp(pool)` / `createTasksController(pool)`** — the pool is injected rather than imported as a singleton. That one decision is what makes the controller unit-testable with a mocked `pg.Pool` and the API integration-testable with a real one, using the exact same code path.
+- **`createApp(pool)` / `create<X>Controller(pool)`** — the pool is injected rather than imported as a singleton. That one decision is what makes controllers unit-testable with a mocked `pg.Pool` and integration-testable with a real one, using the exact same code path.
+- **The streak calculation is a pure function** (`backend/src/utils/streak.ts`), deliberately extracted from any DB/HTTP concern. It takes a list of timestamps and an explicit `asOf` date — never the live clock — so its ~12 edge-case tests (grace periods, month/year boundaries, duplicate same-day sessions, gaps) are 100% deterministic regardless of when the suite runs.
+- **Retreat registration is capacity-safe under concurrency.** Registration is a single atomic `UPDATE retreats SET registered_count = registered_count + 1 WHERE registered_count < capacity`, not a separate read-then-write. The integration suite proves this by firing 10 concurrent registration requests at a 5-seat retreat and asserting exactly 5 succeed and the database never exceeds capacity.
 - **Three independent test layers**, each catching different classes of bugs:
+
   | Layer | Tool | What it catches |
   |---|---|---|
   | Unit | Jest (backend), Vitest (frontend) | Logic errors, edge cases, branching, in milliseconds |
-  | Integration | Jest + supertest + real Postgres | SQL correctness, HTTP status codes, serialization |
+  | Integration | Jest + supertest + real Postgres | SQL correctness, HTTP status codes, concurrency/race conditions |
   | E2E | Playwright | Real browser rendering, real network calls, real user flows |
 
 ## Prerequisites
@@ -48,8 +62,8 @@ docker compose up -d
 # migration to each:
 #   createdb forkable_learning
 #   createdb forkable_learning_test
-#   psql -d forkable_learning      -f backend/migrations/001_create_tasks_table.sql
-#   psql -d forkable_learning_test -f backend/migrations/001_create_tasks_table.sql
+#   psql -d forkable_learning      -f backend/migrations/001_create_practice_platform_tables.sql
+#   psql -d forkable_learning_test -f backend/migrations/001_create_practice_platform_tables.sql
 
 # 2. Backend
 cd backend
@@ -107,11 +121,20 @@ npm run test:e2e
 | Method | Path | Description |
 |---|---|---|
 | GET | `/health` | Liveness check |
-| GET | `/api/tasks` | List all tasks |
-| GET | `/api/tasks/:id` | Get a single task |
-| POST | `/api/tasks` | Create a task (`{ title, description? }`) |
-| PUT | `/api/tasks/:id` | Update a task (`{ title?, description?, is_complete? }`) |
-| DELETE | `/api/tasks/:id` | Delete a task |
+| GET | `/api/meditations?category=` | List meditations, optionally filtered by category (`sitting`\|`standing`\|`walking`\|`lying`) |
+| GET | `/api/meditations/:id` | Get a single meditation |
+| POST | `/api/meditations` | Create a meditation |
+| PUT | `/api/meditations/:id` | Update a meditation |
+| DELETE | `/api/meditations/:id` | Delete a meditation |
+| POST | `/api/sessions` | Log a completed practice session (`meditation_id`, `practiced_by`, `duration_minutes`, `coherence_rating?`) |
+| GET | `/api/sessions/user/:practicedBy` | List a user's logged sessions |
+| GET | `/api/sessions/user/:practicedBy/streak` | Current streak, total sessions, total minutes for a user |
+| GET | `/api/retreats` | List retreats, ordered by start date |
+| GET | `/api/retreats/:id` | Get a single retreat |
+| POST | `/api/retreats` | Create a retreat |
+| POST | `/api/retreats/:id/register` | Register one attendee (409 if at capacity) |
+| GET | `/api/testimonials` | List testimonials, newest first |
+| POST | `/api/testimonials` | Submit a testimonial |
 
 ## License
 

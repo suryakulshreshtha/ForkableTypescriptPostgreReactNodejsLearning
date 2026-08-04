@@ -1,7 +1,7 @@
 {
   "name": "forkable-learning-backend",
   "version": "1.0.0",
-  "description": "Express + TypeScript + PostgreSQL REST API for the Tasks learning app",
+  "description": "Express + TypeScript + PostgreSQL REST API for a mindful-practice learning app (meditation library, session streaks, retreats, testimonials)",
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
