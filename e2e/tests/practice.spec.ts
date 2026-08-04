@@ -23,7 +23,7 @@ test.describe('Mindful Practice app', () => {
     await page.getByLabel('Duration in minutes').fill('12');
     await page.getByRole('button', { name: 'Log Session' }).click();
 
-    await expect(page.getByTestId('current-streak')).toContainText('Current streak: 1 day', { timeout: 10_000 });
+    await expect(page.getByTestId('current-streak')).toContainText('Current streak: 1 day');
     expect(options.length).toBeGreaterThan(1);
   });
 

@@ -13,9 +13,20 @@ export default defineConfig({
   fullyParallel: true,
   retries: process.env.CI ? 2 : 0,
   reporter: [['html', { open: 'never' }], ['list']],
+  // Every interaction in this app triggers a real network round trip
+  // (click -> Express -> Postgres -> response -> React re-render), which is
+  // slower and more variable on CI runners than local dev. Playwright's
+  // defaults (5s action timeout, 5s expect timeout) can be tight for that
+  // under CI load — widen both here rather than patching individual
+  // assertions ad hoc, so any interaction gets the same safety margin.
+  timeout: 30_000,
+  expect: {
+    timeout: 10_000,
+  },
   use: {
     baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',
+    actionTimeout: 10_000,
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
