@@ -1,0 +1,15 @@
+{
+  "name": "forkable-learning-e2e",
+  "version": "1.0.0",
+  "description": "End-to-end tests driving the real frontend + backend + Postgres stack with Playwright",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "install:browsers": "playwright install --with-deps chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.45.1",
+    "@types/node": "^20.14.9",
+    "typescript": "^5.5.3"
+  }
+}
