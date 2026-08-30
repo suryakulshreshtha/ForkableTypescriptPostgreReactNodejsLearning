@@ -34,15 +34,30 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
+      - name: Install backend dependencies
         run: npm ci
+        working-directory: backend
 
-      - name: Build packages
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Install e2e dependencies
+        run: npm ci
+        working-directory: e2e
+
+      - name: Build backend
         run: npm run build
+        working-directory: backend
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
 
       - name: Run database migrations
         run: npm run migrate
+        working-directory: backend
 
       - name: Run Playwright tests
         run: npx playwright test
-
+        working-directory: e2e
