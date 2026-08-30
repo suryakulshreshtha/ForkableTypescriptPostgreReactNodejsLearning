@@ -12,6 +12,9 @@
     "test:unit": "jest --runInBand tests/unit",
     "test:integration": "jest --runInBand tests/integration",
     "test:coverage": "jest --runInBand --coverage"
+    "migrate": "ts-node src/migrations/run.ts"
+    }
+
   },
   "dependencies": {
     "cors": "^2.8.5",
