@@ -9,7 +9,7 @@
     "start": "node dist/index.js",
     "lint": "eslint .",
     "test": "jest --runInBand",
-    "test:unit": "jest --runInBand tests/unit",
+    "test:unit": "jest tests/unit",
     "test:integration": "jest --runInBand tests/integration",
     "test:coverage": "jest --runInBand --coverage"
   },
@@ -17,7 +17,10 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
-    "pg": "^8.12.0"
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
+    "pg": "^8.12.0",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.35.0",

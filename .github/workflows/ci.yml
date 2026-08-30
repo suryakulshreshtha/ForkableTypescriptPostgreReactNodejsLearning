@@ -5,11 +5,24 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+
+# Least privilege: without this every job inherits the repository default
+# token, which is frequently contents: write.
+permissions:
+  contents: read
+
+# Three pushes in a minute should not run three Postgres services and three
+# Playwright installs to completion.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   backend:
     name: Backend (lint, type-check, unit + integration tests)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     services:
       postgres:
@@ -27,6 +40,13 @@ jobs:
           --health-retries 10
 
     steps:
+      # NOTE: actions are pinned by tag, not by commit SHA. A tag can be
+      # repointed at any commit by whoever controls the action, which is how
+      # the tj-actions/changed-files compromise reached thousands of repos.
+      # Pin these properly with a tool that resolves real SHAs:
+      #     go install github.com/suzuki-shunsuke/pinact/cmd/pinact@latest
+      #     pinact run
+      # Dependabot (see .github/dependabot.yml) then keeps the SHAs current.
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
@@ -39,10 +59,19 @@ jobs:
         working-directory: backend
         run: npm ci
 
+      # Apply every migration in order. Previously only 001 ran, so CI tested a
+      # schema that no environment actually has -- and 003's composite index,
+      # which the session queries depend on, was never exercised.
       - name: Apply migrations to test database
         env:
           PGPASSWORD: postgres
-        run: psql -h localhost -U postgres -d forkable_learning_test -f backend/migrations/001_create_practice_platform_tables.sql
+        run: |
+          for migration in backend/migrations/0*.sql; do
+            case "$migration" in *seed*) continue;; esac   # seed data is dev-only
+            echo "applying $migration"
+            psql -v ON_ERROR_STOP=1 -h localhost -U postgres \
+                 -d forkable_learning_test -f "$migration"
+          done
 
       - name: Lint
         working-directory: backend
@@ -73,6 +102,7 @@ jobs:
   frontend:
     name: Frontend (lint, type-check, unit tests, build)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - uses: actions/checkout@v4
@@ -106,6 +136,7 @@ jobs:
   e2e:
     name: End-to-end tests (Playwright)
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     needs: [backend, frontend]
 
     services:
@@ -130,10 +161,17 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Apply migrations to dev database
+      # The e2e database gets the seed data too -- the README says it is seeded
+      # and the suite ran against an empty database.
+      - name: Apply migrations and seed the dev database
         env:
           PGPASSWORD: postgres
-        run: psql -h localhost -U postgres -d forkable_learning -f backend/migrations/001_create_practice_platform_tables.sql
+        run: |
+          for migration in backend/migrations/0*.sql; do
+            echo "applying $migration"
+            psql -v ON_ERROR_STOP=1 -h localhost -U postgres \
+                 -d forkable_learning -f "$migration"
+          done
 
       - name: Install backend dependencies
         working-directory: backend
