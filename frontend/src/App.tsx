@@ -41,7 +41,6 @@ export function App() {
     }
     const handle = setTimeout(() => refreshStreak(practicedBy), 300); // debounce typing
     return () => clearTimeout(handle);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [practicedBy]);
 
   async function loadAll() {
