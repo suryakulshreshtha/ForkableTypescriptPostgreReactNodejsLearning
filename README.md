@@ -1,5 +1,7 @@
 # ForkableTypescriptPostgreReactNodejsLearning
 
+[![CI](https://github.com/suryakulshreshtha/ForkableTypescriptPostgreReactNodejsLearning/actions/workflows/ci.yml/badge.svg)](https://github.com/suryakulshreshtha/ForkableTypescriptPostgreReactNodejsLearning/actions/workflows/ci.yml)
+
 A small, fully-tested full-stack reference app — built the way an SDET would build it, with a real test pyramid instead of an afterthought. Fork it, run it, break it, and use it as a template for your own TypeScript + React + Node.js + PostgreSQL projects.
 
 **Stack:** React 18 · TypeScript · Node.js / Express · PostgreSQL
