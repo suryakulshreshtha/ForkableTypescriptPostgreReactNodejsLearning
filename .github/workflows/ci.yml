@@ -9,7 +9,7 @@ on:
 jobs:
   backend:
     name: Backend (lint, type-check, unit + integration tests)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     services:
       postgres:
@@ -72,7 +72,7 @@ jobs:
 
   frontend:
     name: Frontend (lint, type-check, unit tests, build)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v4
@@ -105,7 +105,7 @@ jobs:
 
   e2e:
     name: End-to-end tests (Playwright)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: [backend, frontend]
 
     services:
