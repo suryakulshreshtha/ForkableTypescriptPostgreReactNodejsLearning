@@ -1,3 +1,7 @@
+<!-- forkable-card:start (added by apply_cards.py; re-run it to update) -->
+![TypeScript, Postgres, React and Node.js: a small, fully-tested full-stack reference app with a real test pyramid](.github/assets/forkable-card.png)
+<!-- forkable-card:end -->
+
 # ForkableTypescriptPostgreReactNodejsLearning
 
 [![CI](https://github.com/suryakulshreshtha/ForkableTypescriptPostgreReactNodejsLearning/actions/workflows/ci.yml/badge.svg)](https://github.com/suryakulshreshtha/ForkableTypescriptPostgreReactNodejsLearning/actions/workflows/ci.yml)
